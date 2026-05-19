@@ -127,6 +127,7 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/meshopt_decoder.js"></script>
 
     <script>
     (function() {
@@ -144,8 +145,8 @@
                 price: '₹20,049.00'
             },
             superstar: {
-                file: 'supastarOBJ.obj',
-                type: 'obj',
+                file: 'superstar.glb',
+                type: 'glb',
                 name: 'Superstar',
                 price: '₹18,499.00'
             }
@@ -207,7 +208,7 @@
 
         // --- Loaders ---
         const gltfLoader = new THREE.GLTFLoader();
-        const objLoader = new THREE.OBJLoader();
+        gltfLoader.setMeshoptDecoder(MeshoptDecoder);
 
         // --- Helper: remove current model ---
         function removeCurrentModel() {
@@ -370,65 +371,67 @@
                 isLoading = false;
             }
 
-            if (modelDef.type === 'glb') {
-                gltfLoader.load(modelDef.file, function(gltf) {
+            gltfLoader.load(modelDef.file, function(gltf) {
                     var model = gltf.scene;
 
-                    // Classify meshes as upper or sole by bounding box Y
                     model.updateMatrixWorld(true);
                     var modelBox = new THREE.Box3().setFromObject(model);
                     var modelMinY = modelBox.min.y;
                     var modelHeight = modelBox.max.y - modelMinY;
                     var soleCutoff = modelMinY + modelHeight * SOLE_RATIO;
 
+                    // Check if this is a simple model (single mesh, no textures)
+                    var meshCount = 0;
+                    var hasTextures = false;
                     model.traverse(function(child) {
                         if (child.isMesh) {
-                            child.geometry.computeVertexNormals();
-                            var meshBox = new THREE.Box3().setFromObject(child);
-                            var meshCenterY = (meshBox.min.y + meshBox.max.y) / 2;
-                            var isUpper = meshCenterY > soleCutoff;
-
-                            if (Array.isArray(child.material)) {
-                                child.material.forEach(function(mat) {
-                                    mat.side = THREE.DoubleSide;
-                                    if (isUpper) shoeMaterials.push(mat);
-                                });
-                            } else {
-                                child.material.side = THREE.DoubleSide;
-                                if (isUpper) shoeMaterials.push(child.material);
-                            }
+                            meshCount++;
+                            var mat = child.material;
+                            if (mat.map || mat.normalMap || mat.roughnessMap || mat.metalnessMap) hasTextures = true;
                         }
                     });
+                    var useVertexColoring = (meshCount <= 1 && !hasTextures);
+
+                    if (useVertexColoring) {
+                        // Superstar-style: single mesh, use vertex coloring for upper/sole
+                        model.traverse(function(child) {
+                            if (child.isMesh) {
+                                child.geometry.computeVertexNormals();
+                                child.material = new THREE.MeshStandardMaterial({
+                                    color: 0xffffff,
+                                    roughness: 0.45,
+                                    metalness: 0.1,
+                                    side: THREE.DoubleSide,
+                                    vertexColors: true
+                                });
+                            }
+                        });
+                        setupUpperColoring(model);
+                    } else {
+                        // Nike Air-style: multi-mesh with textures, classify by bounding box
+                        model.traverse(function(child) {
+                            if (child.isMesh) {
+                                child.geometry.computeVertexNormals();
+                                var meshBox = new THREE.Box3().setFromObject(child);
+                                var meshCenterY = (meshBox.min.y + meshBox.max.y) / 2;
+                                var isUpper = meshCenterY > soleCutoff;
+
+                                if (Array.isArray(child.material)) {
+                                    child.material.forEach(function(mat) {
+                                        mat.side = THREE.DoubleSide;
+                                        if (isUpper) shoeMaterials.push(mat);
+                                    });
+                                } else {
+                                    child.material.side = THREE.DoubleSide;
+                                    if (isUpper) shoeMaterials.push(child.material);
+                                }
+                            }
+                        });
+                    }
                     prepareModel(model);
                     hideLoading();
                     isLoading = false;
                 }, onProgress, onError);
-
-            } else if (modelDef.type === 'obj') {
-                var defaultMat = new THREE.MeshStandardMaterial({
-                    color: 0xffffff,
-                    roughness: 0.45,
-                    metalness: 0.1,
-                    side: THREE.DoubleSide,
-                    vertexColors: true
-                });
-                objLoader.load(modelDef.file, function(obj) {
-                    obj.traverse(function(child) {
-                        if (child.isMesh) {
-                            child.material = defaultMat.clone();
-                            child.material.vertexColors = true;
-                            child.geometry.computeVertexNormals();
-                        }
-                    });
-
-                    // Setup per-vertex upper/sole coloring
-                    setupUpperColoring(obj);
-
-                    prepareModel(obj);
-                    hideLoading();
-                    isLoading = false;
-                }, onProgress, onError);
-            }
         }
 
         // --- Load default model (Nike Air) ---
