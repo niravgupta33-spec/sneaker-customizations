@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History | KICKCRAFT</title>
+    <meta name="description" content="View your KickCraft order history and track your custom sneaker orders.">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="blob-bg"></div>
+
+    <nav class="navbar">
+        <div class="logo">KICK<span>CRAFT</span></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#features">Features</a></li>
+            <li><a href="customize.html">Customizer</a></li>
+        </ul>
+        <div class="navbar-right">
+            <a href="index.html" class="btn-secondary">Back</a>
+            <button class="cart-icon-btn" id="cartOpenBtn">
+                🛒
+                <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="orders-page-container">
+        <div class="orders-page-header">
+            <h1>Order <span class="gradient-text">History</span></h1>
+            <p>Track all your KickCraft purchases and custom creations.</p>
+        </div>
+
+        <div class="orders-header-actions">
+            <button class="btn-clear-orders" id="clearOrdersBtn">🗑️ Clear History</button>
+        </div>
+
+        <div class="orders-list" id="ordersContainer">
+            <!-- Orders rendered by JS -->
+        </div>
+    </main>
+
+    <!-- Cart Overlay & Sidebar -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>Your Cart</h3>
+            <button class="cart-close" id="cartCloseBtn">✕</button>
+        </div>
+        <div class="cart-items" id="cartItemsContainer">
+            <div class="cart-empty">Your cart is empty.</div>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cartTotal">₹0</span>
+            </div>
+            <button class="btn-primary btn-checkout" style="width: 100%;">Checkout</button>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

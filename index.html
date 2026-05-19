@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KICKCRAFT | Premium Custom Sneakers</title>
+    <meta name="description"
+        content="Design your dream sneaker with our premium 3D customizer. Explore high-end materials and limitless color combinations.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+
+
+    <div class="blob-bg"></div>
+
+
+    <div class="shipping-banner">
+        🚚 Free shipping on all orders over ₹5999 &nbsp;|&nbsp; 🔥 Limited drops every Friday &nbsp;|&nbsp; ✨
+        Handcrafted in 48hrs
+    </div>
+
+    <nav class="navbar">
+        <div class="logo">KICK<span>CRAFT</span></div>
+        <ul class="nav-links">
+            <li><a href="index.html#home" class="active">Home</a></li>
+            <li><a href="index.html#features">Features</a></li>
+            <li><a href="index.html#shop">Shop</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+            <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+        <div class="navbar-right">
+            <a href="customize.html" class="btn-primary">Customize Now</a>
+            <button class="cart-icon-btn" id="cartOpenBtn">
+                🛒
+                <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="home" class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Design Your <br><span class="gradient-text">Ultimate Stride</span></h1>
+            <p class="hero-subtitle">Step into the future of footwear. Craft your unique aesthetic with premium
+                materials and limitless colorways.</p>
+            <div class="hero-buttons">
+                <a href="customize.html" class="btn-primary glow">Start Creating</a>
+                <a href="gallery.html" class="btn-secondary">View Inspiration</a>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <h4>10M+</h4>
+                    <p>Combinations</p>
+                </div>
+                <div class="stat-item">
+                    <h4>100%</h4>
+                    <p>Premium Leather</p>
+                </div>
+                <div class="stat-item">
+                    <h4>48hr</h4>
+                    <p>Assembly Time</p>
+                </div>
+            </div>
+        </div>
+        <div class="hero-image-wrapper">
+            <div class="glow-orb"></div>
+            <img src="assets/hero.png" alt="Premium Futuristic Custom Sneaker" class="hero-image">
+        </div>
+    </header>
+
+
+    <section id="features" class="features-section">
+        <div class="section-header">
+            <h2>Why <span class="gradient-text">KickCraft?</span></h2>
+            <p>We blend artisan craftsmanship with next-generation customization technology.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="icon-box">🎨</div>
+                <h3>Limitless Colors</h3>
+                <p>Choose from thousands of vibrant neon, matte, and metallic finishes to make your kicks truly yours.
+                </p>
+                <a href="customize.html" class="btn-text" style="display: inline-block; margin-top: 16px;">Explore
+                    Multi-Colors &rarr;</a>
+            </div>
+            <div class="feature-card">
+                <div class="icon-box">✨</div>
+                <h3>Premium Materials</h3>
+                <p>Italian leather, breathable future-mesh, and sustainable synthetics crafted for comfort and
+                    durability.</p>
+                <a href="material.html" class="btn-text" style="display: inline-block; margin-top: 16px;">Explore
+                    Materials &rarr;</a>
+            </div>
+            <div class="feature-card">
+                <div class="icon-box">🚀</div>
+                <h3>Ergonomic Sole</h3>
+                <p>Cloud-step technology engineered perfectly to support dynamic movements all day long.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="drops-section">
+        <div class="drops-inner">
+            <div class="drops-label">🔥 Next Limited Drop</div>
+            <h2 class="drops-title">Shadow Flame <span class="gradient-text">Collection</span></h2>
+            <p class="drops-sub">Only 50 pairs. Handcrafted. Never restocked.</p>
+            <div class="countdown">
+                <div class="countdown-block"><span>03</span><label>Days</label></div>
+                <div class="countdown-sep">:</div>
+                <div class="countdown-block"><span>12</span><label>Hours</label></div>
+                <div class="countdown-sep">:</div>
+                <div class="countdown-block"><span>45</span><label>Mins</label></div>
+                <div class="countdown-sep">:</div>
+                <div class="countdown-block"><span>00</span><label>Secs</label></div>
+            </div>
+            <a href="#shop" class="btn-primary glow">Notify Me</a>
+        </div>
+    </section>
+
+    <section id="shop" class="shop-section">
+        <div class="section-header">
+            <h2>Featured <span class="gradient-text">Shop</span></h2>
+            <p>Hand-picked premium designs ready to ship — or customize to make them yours.</p>
+        </div>
+        <div class="shop-grid">
+
+            <div class="shop-card">
+                <div class="shop-badge">Best Seller</div>
+                <img src="assets/red.png" alt="Inferno X Sneaker">
+                <div class="shop-swatches">
+                    <span class="swatch" style="background:#ff3a3a" title="Crimson"></span>
+                    <span class="swatch" style="background:#ff7a00" title="Blaze"></span>
+                    <span class="swatch" style="background:#111" title="Shadow Black"></span>
+                </div>
+                <div class="shop-info">
+                    <h3>Inferno X</h3>
+                    <div class="shop-stars">★★★★★ <span>(25000)</span></div>
+                    <p class="shop-price">₹25000</p>
+                    <div class="size-selector">
+                        <label>Size (US)</label>
+                        <div class="size-options">
+                            <input type="radio" name="size-inferno" class="size-radio" id="si-7" hidden checked>
+                            <label for="si-7" class="size-btn">7</label>
+                            <input type="radio" name="size-inferno" class="size-radio" id="si-8" hidden>
+                            <label for="si-8" class="size-btn">8</label>
+                            <input type="radio" name="size-inferno" class="size-radio" id="si-9" hidden>
+                            <label for="si-9" class="size-btn">9</label>
+                            <input type="radio" name="size-inferno" class="size-radio" id="si-10" hidden>
+                            <label for="si-10" class="size-btn">10</label>
+                            <input type="radio" name="size-inferno" class="size-radio" id="si-11" hidden>
+                            <label for="si-11" class="size-btn">11</label>
+                        </div>
+                    </div>
+
+                    <button class="btn-add-cart">🛒 Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="shop-card">
+                <div class="shop-badge new-badge">New</div>
+                <img src="assets/blue.png" alt="Deep Void Sneaker">
+                <div class="shop-swatches">
+                    <span class="swatch" style="background:#0066ff" title="Electric Blue"></span>
+                    <span class="swatch" style="background:#00d2ff" title="Cyan"></span>
+                    <span class="swatch" style="background:#7c3aed" title="Midnight Purple"></span>
+                </div>
+                <div class="shop-info">
+                    <h3>Deep Void</h3>
+                    <div class="shop-stars">★★★★☆ <span>(94)</span></div>
+                    <p class="shop-price">₹11,676</p>
+                    <div class="size-selector">
+                        <label>Size (US)</label>
+                        <div class="size-options">
+                            <input type="radio" name="size-deep" class="size-radio" id="sd-7" hidden checked>
+                            <label for="sd-7" class="size-btn">7</label>
+                            <input type="radio" name="size-deep" class="size-radio" id="sd-8" hidden>
+                            <label for="sd-8" class="size-btn">8</label>
+                            <input type="radio" name="size-deep" class="size-radio" id="sd-9" hidden>
+                            <label for="sd-9" class="size-btn">9</label>
+                            <input type="radio" name="size-deep" class="size-radio" id="sd-10" hidden>
+                            <label for="sd-10" class="size-btn">10</label>
+                            <input type="radio" name="size-deep" class="size-radio" id="sd-11" hidden>
+                            <label for="sd-11" class="size-btn">11</label>
+                        </div>
+                    </div>
+                    <button class="btn-add-cart">🛒 Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="shop-card shop-card-cta">
+                <div class="cta-card-inner">
+                    <div class="cta-icon">✏️</div>
+                    <h3>Build Your Own</h3>
+                    <p>Pick your materials, colors, and sole — and we'll craft it just for you in 48 hours.</p>
+                    <a href="customize.html" class="btn-primary glow" style="margin-top: 24px;">Start Customizing
+                        &rarr;</a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <section id="gallery" class="gallery-section">
+        <div class="section-header">
+            <h2>Community <span class="gradient-text">Creations</span></h2>
+            <p>Get inspired by some of the sleekest designs built by our community.</p>
+        </div>
+        <div class="gallery-grid">
+            <div class="gallery-card">
+                <img src="assets/red.png" alt="Vibrant Red and Black Custom Sneaker">
+                <div class="card-content">
+                    <h3>Inferno X</h3>
+                    <p>Designed by @SpeedRunner</p>
+                    <div class="card-actions">
+                        <a href="#" class="btn-text">Customize this style &rarr;</a>
+                        <label for="cart-toggle" class="btn-add-cart-label" style="display:inline-block">
+                            <span class="btn-add-cart">🛒 Add to Cart</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="gallery-card">
+                <img src="assets/blue.png" alt="Deep Blue and White Custom Sneaker">
+                <div class="card-content">
+                    <h3>Deep Void</h3>
+                    <p>Designed by @FrostTech</p>
+                    <div class="card-actions">
+                        <a href="#" class="btn-text">Customize this style &rarr;</a>
+                        <label for="cart-toggle" class="btn-add-cart-label" style="display:inline-block">
+                            <span class="btn-add-cart">🛒 Add to Cart</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="testimonials-section">
+        <div class="section-header">
+            <h2>What Our <span class="gradient-text">Community Says</span></h2>
+            <p>Real reviews from sneakerheads who built their dream kicks with us.</p>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="t-stars">★★★★★</div>
+                <p class="t-quote">"I couldn't believe how accurately they matched my design. The leather quality is
+                    insane — absolutely worth every cent."</p>
+                <div class="t-author">
+                    <div class="t-avatar">JK</div>
+                    <div>
+                        <strong>Jordan K.</strong>
+                        <span>Verified Buyer</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="t-stars">★★★★★</div>
+                <p class="t-quote">"The Inferno X is my daily rotation shoe. The 3D customizer made it so easy — built
+                    them in 10 minutes flat."</p>
+                <div class="t-author">
+                    <div class="t-avatar">MR</div>
+                    <div>
+                        <strong>Maya R.</strong>
+                        <span>Verified Buyer</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="t-stars">★★★★☆</div>
+                <p class="t-quote">"Shipping was lightning fast and packaging was premium. My whole squad keeps asking
+                    where I got these."</p>
+                <div class="t-author">
+                    <div class="t-avatar">TS</div>
+                    <div>
+                        <strong>Tyler S.</strong>
+                        <span>Verified Buyer</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="newsletter-section">
+        <div class="newsletter-inner">
+            <div class="newsletter-text">
+                <h2>Drop Early Access. <span class="gradient-text">Always First.</span></h2>
+                <p>Join 40,000+ sneaker fans. Get exclusive drops, discounts, and behind-the-scenes looks delivered
+                    straight to you.</p>
+            </div>
+            <form class="newsletter-form" action="#">
+                <input type="email" id="newsletter-email" placeholder="Enter your email address" required>
+                <button type="submit" class="btn-primary">Subscribe 🔥</button>
+            </form>
+        </div>
+    </section>
+
+
+
+
+
+    <footer id="contact">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="logo">KICK<span>CRAFT</span></div>
+                <p>The ultimate destination for premium, customizable digital-to-physical footwear.</p>
+            </div>
+            <div class="footer-links">
+                <div class="link-col">
+                    <h4>Company</h4>
+                    <a href="#">About Us</a>
+                    <a href="#">Careers</a>
+                    <a href="#">Press</a>
+                </div>
+                <div class="link-col">
+                    <h4>Support</h4>
+                    <a href="#">FAQ</a>
+                    <a href="#">Shipping Returns</a>
+                    <a href="#">Material Guide</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 KickCraft. All rights reserved.</p>
+        </div>
+    </footer>
+
+
+    <!-- Cart Overlay & Sidebar -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>Your Cart</h3>
+            <button class="cart-close" id="cartCloseBtn">✕</button>
+        </div>
+        <div class="cart-items" id="cartItemsContainer">
+            <div class="cart-empty">Your cart is empty.</div>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cartTotal">₹0</span>
+            </div>
+            <button class="btn-primary btn-checkout" style="width: 100%;">Checkout</button>
+        </div>
+
+
+    </div>
+
+
+
+
+    <script src="main.js"></script>
+</body>
+
+</html>

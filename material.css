@@ -1,0 +1,375 @@
+
+.material-studio-container {
+    display: flex;
+    height: 100vh;
+    padding-top: 80px;
+}
+
+/* Left Canvas Panel */
+.material-canvas-panel {
+    flex: 6;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    background: radial-gradient(circle at center, rgba(15, 15, 20, 0.8) 0%, transparent 70%);
+}
+
+/* 3D Viewer Container */
+.material-3d-wrapper {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 80px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+#materialCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 2;
+    cursor: grab;
+}
+
+#materialCanvas:active {
+    cursor: grabbing;
+}
+
+/* Loading Overlay */
+.material-loading {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    background: rgba(5, 5, 5, 0.6);
+    backdrop-filter: blur(8px);
+    border-radius: 20px;
+}
+
+.material-loading span {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+}
+
+.mat-loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 255, 255, 0.08);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: matSpin 0.9s linear infinite;
+}
+
+@keyframes matSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* Viewer Hint */
+.material-viewer-hint {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 30px;
+    padding: 10px 24px;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
+.material-viewer-hint span {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+/* ── Model Switcher Pills ──────────────────────────────── */
+.model-switcher-pills {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 40px;
+    padding: 5px 6px;
+}
+
+.model-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: 1px solid transparent;
+    border-radius: 30px;
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.model-pill:hover {
+    color: rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.06);
+}
+
+.model-pill.active {
+    background: rgba(0, 255, 204, 0.12);
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: 0 0 16px rgba(0, 255, 204, 0.15);
+}
+
+.pill-icon {
+    font-size: 1rem;
+}
+
+.pill-label {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* Config Panel (Right side) */
+.materials-panel {
+    flex: 4;
+    background: rgba(10, 10, 10, 0.92);
+    backdrop-filter: blur(25px);
+    border-left: 1px solid var(--card-border);
+    padding: 36px 32px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.materials-panel::-webkit-scrollbar {
+    width: 6px;
+}
+.materials-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+.materials-panel::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+}
+
+.mat-studio-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--primary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.config-header {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.config-header h2 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+}
+
+.mat-studio-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+/* Full-width: no shoe panel beside it (fallback) */
+.materials-panel--full {
+    flex: 1;
+    border-left: none;
+    max-width: 700px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.material-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 40px;
+    flex: 1;
+}
+
+.material-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--card-border);
+    padding: 16px;
+    border-radius: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.material-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0, 255, 204, 0.04) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.material-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateX(6px);
+}
+
+.material-card:hover::before {
+    opacity: 1;
+}
+
+.material-card.active {
+    background: rgba(0, 255, 204, 0.06);
+    border-color: var(--primary);
+    box-shadow: 0 0 24px rgba(0, 255, 204, 0.1), 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.material-card.active::before {
+    opacity: 1;
+}
+
+.mat-swatch {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.material-card:hover .mat-swatch {
+    transform: scale(1.08);
+}
+
+.material-card.active .mat-swatch {
+    box-shadow: 0 0 16px rgba(0, 255, 204, 0.2), 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.suede-texture {
+    filter: url(#roughpaper) sepia(0.5);
+}
+
+.holographic-swatch {
+    animation: holoShift 3s ease-in-out infinite alternate;
+}
+
+@keyframes holoShift {
+    0% { filter: hue-rotate(0deg) brightness(1); }
+    50% { filter: hue-rotate(90deg) brightness(1.15); }
+    100% { filter: hue-rotate(180deg) brightness(1); }
+}
+
+.mat-info {
+    flex: 1;
+}
+
+.mat-info h4 {
+    font-size: 1.05rem;
+    color: var(--text-color);
+    margin-bottom: 4px;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.material-card.active .mat-info h4 {
+    color: var(--primary);
+}
+
+.mat-info p {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+/* Checkmark indicator */
+.mat-check {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: transparent;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.material-card.active .mat-check {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: #000;
+    box-shadow: 0 0 12px rgba(0, 255, 204, 0.3);
+}
+
+/* Action Footer */
+.action-footer {
+    margin-top: auto;
+    padding-top: 24px;
+    border-top: 1px solid var(--card-border);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .material-studio-container {
+        flex-direction: column;
+        height: auto;
+    }
+    .material-canvas-panel {
+        min-height: 50vh;
+        padding: 0;
+    }
+    .material-3d-wrapper {
+        height: 50vh;
+        min-height: 350px;
+    }
+    .materials-panel {
+        border-left: none;
+        border-top: 1px solid var(--card-border);
+    }
+    .model-switcher-pills {
+        top: 12px;
+    }
+    .model-pill {
+        padding: 8px 14px;
+        font-size: 0.8rem;
+    }
+}

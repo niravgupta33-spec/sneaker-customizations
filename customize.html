@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customize Your Sneakers | KICKCRAFT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="customizestyle.css">
+</head>
+
+<body class="customizer-body">
+    <div class="blob-bg"></div>
+
+    <nav class="navbar">
+        <div class="logo">KICK<span>CRAFT</span></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#features">Features</a></li>
+            <li><a href="index.html#gallery">Gallery</a></li>
+        </ul>
+        <div class="navbar-right">
+            <a href="index.html" class="btn-secondary">Back</a>
+            <button class="cart-icon-btn" id="cartOpenBtn">
+                🛒
+                <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+            </button>
+        </div>
+    </nav>
+
+
+    <main class="customizer-container">
+
+        <div class="preview-panel">
+            <div class="preview-wrapper" id="shoe3dContainer">
+                <canvas id="shoeCanvas"></canvas>
+                <div class="model-loading" id="modelLoading">
+                    <div class="loading-spinner"></div>
+                    <span>Loading 3D Model…</span>
+                </div>
+                <div class="viewer-hint" id="viewerHint">
+                    <span>🔄 Drag to rotate • Scroll to zoom</span>
+                </div>
+            </div>
+        </div>
+
+       
+
+        <div class="config-panel">
+            <div class="config-header">
+                <p class="config-label">CUSTOMIZER</p>
+                <h2>Build Your <span class="gradient-text" id="modelTitle">Nike Air</span></h2>
+                <p class="price" id="modelPrice">₹20,049.00 <span class="price-tag">Base Price</span></p>
+            </div>
+
+            <div class="options-container">
+
+                <div class="option-group">
+                    <h3>👟 Choose Model</h3>
+                    <div class="model-selector">
+                        <button class="model-card active" id="modelBtn-nike" data-model="nike">
+                            <div class="model-card-icon">🔥</div>
+                            <div class="model-card-info">
+                                <span class="model-card-name">Nike Air</span>
+                                <span class="model-card-desc">Premium athletic shoe</span>
+                            </div>
+                            <div class="model-card-check">✓</div>
+                        </button>
+                        <button class="model-card" id="modelBtn-superstar" data-model="superstar">
+                            <div class="model-card-icon">⭐</div>
+                            <div class="model-card-info">
+                                <span class="model-card-name">Superstar</span>
+                                <span class="model-card-desc">Classic shell-toe design</span>
+                            </div>
+                            <div class="model-card-check">✓</div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="option-group">
+                    <h3>🎨 Upper Color</h3>
+                    <div class="color-picker-wrapper">
+                        <input type="color" id="shoeColorPicker" value="#ffffff">
+                        <div class="picker-info">
+                            <span class="picker-label">Changes upper only — sole stays white</span>
+                            <span class="picker-hex" id="pickerHexDisplay">#FFFFFF</span>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="checkout-section">
+                <div class="total-row">
+                    <span>Total Estimated:</span>
+                    <span class="total-price" id="total-price">₹20,049.00</span>
+                </div>
+                <button class="btn-primary glow btn-full btn-add-cart" id="customizerAddToCart" style="width: 100%; text-align: center; font-size: 1.05rem; padding: 16px;">Add To Cart</button>
+            </div>
+        </div>
+    </main>
+
+
+    <!-- Cart Overlay & Sidebar -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>Your Cart</h3>
+            <button class="cart-close" id="cartCloseBtn">✕</button>
+        </div>
+        <div class="cart-items" id="cartItemsContainer">
+            <div class="cart-empty">Your cart is empty.</div>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cartTotal">₹0</span>
+            </div>
+            <button class="btn-primary btn-checkout" style="width: 100%;">Checkout</button>
+        </div>
+    </div>
+
+    <!-- Three.js + OBJLoader + GLTFLoader -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+    <script>
+    (function() {
+        const container = document.getElementById('shoe3dContainer');
+        const canvas = document.getElementById('shoeCanvas');
+        const loadingEl = document.getElementById('modelLoading');
+        if (!container || !canvas) return;
+
+        // --- Model definitions ---
+        const MODELS = {
+            nike: {
+                file: 'uploads_files_4278121_Nike_Air_Shoes.glb',
+                type: 'glb',
+                name: 'Nike Air',
+                price: '₹20,049.00'
+            },
+            superstar: {
+                file: 'supastarOBJ.obj',
+                type: 'obj',
+                name: 'Superstar',
+                price: '₹18,499.00'
+            }
+        };
+
+        let currentModelKey = 'nike';
+
+        // --- Scene setup ---
+        const scene = new THREE.Scene();
+
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 5000);
+        camera.position.set(0, 150, 400);
+
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setClearColor(0x000000, 0);
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        renderer.outputEncoding = THREE.sRGBEncoding;
+
+        // --- Lighting (neutral white for true color rendering) ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+
+        const keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
+        keyLight.position.set(300, 400, 300);
+        scene.add(keyLight);
+
+        const fillLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        fillLight.position.set(-200, 200, -100);
+        scene.add(fillLight);
+
+        const rimLight = new THREE.DirectionalLight(0xffffff, 0.3);
+        rimLight.position.set(0, -100, -300);
+        scene.add(rimLight);
+
+        // Subtle colored accent from below (very faint)
+        const accentLight = new THREE.PointLight(0x00ffcc, 0.15, 600);
+        accentLight.position.set(0, -150, 0);
+        scene.add(accentLight);
+
+        // --- Orbit Controls ---
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 2.0;
+        controls.enablePan = false;
+        controls.minDistance = 150;
+        controls.maxDistance = 800;
+
+        // --- State ---
+        let shoeObject = null;
+        let shoeMaterials = [];       // For GLB upper-only materials
+        let upperVertexData = [];     // For OBJ per-vertex upper coloring
+        let isLoading = false;
+        const SOLE_RATIO = 0.28;     // Bottom 28% of model height = sole
+
+        // --- Loaders ---
+        const gltfLoader = new THREE.GLTFLoader();
+        const objLoader = new THREE.OBJLoader();
+
+        // --- Helper: remove current model ---
+        function removeCurrentModel() {
+            if (shoeObject) {
+                scene.remove(shoeObject);
+                shoeObject.traverse(function(child) {
+                    if (child.isMesh) {
+                        child.geometry.dispose();
+                        if (Array.isArray(child.material)) {
+                            child.material.forEach(function(m) { m.dispose(); });
+                        } else {
+                            child.material.dispose();
+                        }
+                    }
+                });
+                shoeObject = null;
+            }
+            shoeMaterials = [];
+            upperVertexData = [];
+        }
+
+        // --- Helper: prepare model (center & scale) ---
+        function prepareModel(obj) {
+            const box = new THREE.Box3().setFromObject(obj);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            obj.position.sub(center);
+
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = 200 / maxDim;
+            obj.scale.setScalar(scale);
+
+            scene.add(obj);
+            shoeObject = obj;
+
+            controls.target.set(0, 0, 0);
+            controls.autoRotate = true;
+            controls.update();
+        }
+
+        // --- Helper: setup vertex colors for upper/sole separation ---
+        function setupUpperColoring(obj) {
+            upperVertexData = [];
+            obj.updateMatrixWorld(true);
+
+            // Compute bounding box in world space (before prepareModel transform)
+            var bbox = new THREE.Box3().setFromObject(obj);
+            var minY = bbox.min.y;
+            var height = bbox.max.y - minY;
+            var soleThreshold = minY + height * SOLE_RATIO;
+
+            var vertex = new THREE.Vector3();
+
+            obj.traverse(function(child) {
+                if (!child.isMesh) return;
+                var geom = child.geometry;
+                var pos = geom.attributes.position;
+                var count = pos.count;
+
+                // Create white vertex color buffer
+                var colorArr = new Float32Array(count * 3);
+                for (var i = 0; i < count; i++) {
+                    colorArr[i * 3] = 1;
+                    colorArr[i * 3 + 1] = 1;
+                    colorArr[i * 3 + 2] = 1;
+                }
+                geom.setAttribute('color', new THREE.BufferAttribute(colorArr, 3));
+
+                // Enable vertex colors on material
+                child.material.vertexColors = true;
+                child.material.color.set(0xffffff);
+                child.material.needsUpdate = true;
+
+                // Find upper vertex indices (above sole threshold in world space)
+                var upperIndices = [];
+                var wm = child.matrixWorld;
+                for (var i = 0; i < count; i++) {
+                    vertex.set(pos.getX(i), pos.getY(i), pos.getZ(i));
+                    vertex.applyMatrix4(wm);
+                    if (vertex.y > soleThreshold) {
+                        upperIndices.push(i);
+                    }
+                }
+
+                if (upperIndices.length > 0) {
+                    upperVertexData.push({
+                        geometry: geom,
+                        upperIndices: upperIndices
+                    });
+                }
+            });
+        }
+
+        // --- Helper: apply color to upper vertices only ---
+        function applyUpperColor(hex) {
+            var color = new THREE.Color(hex);
+            upperVertexData.forEach(function(data) {
+                var colors = data.geometry.attributes.color;
+                // Reset all vertices to white (sole color)
+                for (var i = 0; i < colors.count; i++) {
+                    colors.setXYZ(i, 1, 1, 1);
+                }
+                // Set upper vertices to selected color
+                data.upperIndices.forEach(function(idx) {
+                    colors.setXYZ(idx, color.r, color.g, color.b);
+                });
+                colors.needsUpdate = true;
+            });
+        }
+
+        // --- Show / hide loading ---
+        function showLoading(text) {
+            if (loadingEl) {
+                loadingEl.style.display = 'flex';
+                loadingEl.querySelector('.loading-spinner').style.display = 'block';
+                loadingEl.querySelector('span').textContent = text || 'Loading 3D Model…';
+            }
+        }
+        function hideLoading() {
+            if (loadingEl) loadingEl.style.display = 'none';
+        }
+
+        // --- Load a model by key ---
+        function loadModel(key) {
+            if (isLoading) return;
+            const modelDef = MODELS[key];
+            if (!modelDef) return;
+
+            isLoading = true;
+            currentModelKey = key;
+            removeCurrentModel();
+            showLoading('Loading ' + modelDef.name + '…');
+
+            // Reset color picker
+            var shoeColorPicker = document.getElementById('shoeColorPicker');
+            var pickerHexDisplay = document.getElementById('pickerHexDisplay');
+            if (shoeColorPicker) shoeColorPicker.value = '#ffffff';
+            if (pickerHexDisplay) pickerHexDisplay.textContent = '#FFFFFF';
+
+            // Update header info
+            var titleEl = document.getElementById('modelTitle');
+            var priceEl = document.getElementById('modelPrice');
+            var totalEl = document.getElementById('total-price');
+            if (titleEl) titleEl.textContent = modelDef.name;
+            if (priceEl) priceEl.innerHTML = modelDef.price + ' <span class="price-tag">Base Price</span>';
+            if (totalEl) totalEl.textContent = modelDef.price;
+
+            function onProgress(xhr) {
+                if (loadingEl && xhr.total) {
+                    var pct = Math.round((xhr.loaded / xhr.total) * 100);
+                    loadingEl.querySelector('span').textContent = 'Loading ' + modelDef.name + '… ' + pct + '%';
+                }
+            }
+            function onError(err) {
+                console.error('Error loading model:', err);
+                if (loadingEl) {
+                    loadingEl.querySelector('span').textContent = 'Failed to load model';
+                    loadingEl.querySelector('.loading-spinner').style.display = 'none';
+                }
+                isLoading = false;
+            }
+
+            if (modelDef.type === 'glb') {
+                gltfLoader.load(modelDef.file, function(gltf) {
+                    var model = gltf.scene;
+
+                    // Classify meshes as upper or sole by bounding box Y
+                    model.updateMatrixWorld(true);
+                    var modelBox = new THREE.Box3().setFromObject(model);
+                    var modelMinY = modelBox.min.y;
+                    var modelHeight = modelBox.max.y - modelMinY;
+                    var soleCutoff = modelMinY + modelHeight * SOLE_RATIO;
+
+                    model.traverse(function(child) {
+                        if (child.isMesh) {
+                            child.geometry.computeVertexNormals();
+                            var meshBox = new THREE.Box3().setFromObject(child);
+                            var meshCenterY = (meshBox.min.y + meshBox.max.y) / 2;
+                            var isUpper = meshCenterY > soleCutoff;
+
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(function(mat) {
+                                    mat.side = THREE.DoubleSide;
+                                    if (isUpper) shoeMaterials.push(mat);
+                                });
+                            } else {
+                                child.material.side = THREE.DoubleSide;
+                                if (isUpper) shoeMaterials.push(child.material);
+                            }
+                        }
+                    });
+                    prepareModel(model);
+                    hideLoading();
+                    isLoading = false;
+                }, onProgress, onError);
+
+            } else if (modelDef.type === 'obj') {
+                var defaultMat = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    roughness: 0.45,
+                    metalness: 0.1,
+                    side: THREE.DoubleSide,
+                    vertexColors: true
+                });
+                objLoader.load(modelDef.file, function(obj) {
+                    obj.traverse(function(child) {
+                        if (child.isMesh) {
+                            child.material = defaultMat.clone();
+                            child.material.vertexColors = true;
+                            child.geometry.computeVertexNormals();
+                        }
+                    });
+
+                    // Setup per-vertex upper/sole coloring
+                    setupUpperColoring(obj);
+
+                    prepareModel(obj);
+                    hideLoading();
+                    isLoading = false;
+                }, onProgress, onError);
+            }
+        }
+
+        // --- Load default model (Nike Air) ---
+        loadModel('nike');
+
+        // --- Model selector buttons ---
+        var modelBtns = document.querySelectorAll('.model-card');
+        modelBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var key = btn.getAttribute('data-model');
+                if (key === currentModelKey && !isLoading) return;
+                modelBtns.forEach(function(b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                loadModel(key);
+            });
+        });
+
+        // --- Color Customization (upper only) ---
+        var shoeColorPicker = document.getElementById('shoeColorPicker');
+        var pickerHexDisplay = document.getElementById('pickerHexDisplay');
+        if (shoeColorPicker) {
+            shoeColorPicker.addEventListener('input', function(e) {
+                var hex = e.target.value;
+                if (pickerHexDisplay) pickerHexDisplay.textContent = hex.toUpperCase();
+
+                // GLB: change upper materials only
+                shoeMaterials.forEach(function(mat) {
+                    mat.color.set(hex);
+                    mat.needsUpdate = true;
+                });
+
+                // OBJ: change upper vertex colors only
+                if (upperVertexData.length > 0) {
+                    applyUpperColor(hex);
+                }
+            });
+        }
+
+        // Fade out hint after first interaction
+        var viewerHint = document.getElementById('viewerHint');
+        if (viewerHint) {
+            canvas.addEventListener('pointerdown', function() {
+                viewerHint.style.opacity = '0';
+                controls.autoRotate = false;
+                setTimeout(function() { viewerHint.style.display = 'none'; }, 600);
+            }, { once: true });
+        }
+
+
+
+        // --- Animate ---
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // --- Resize ---
+        window.addEventListener('resize', function() {
+            var w = container.clientWidth;
+            var h = container.clientHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        });
+    })();
+    </script>
+
+    <script src="main.js"></script>
+</body>
+</html>
