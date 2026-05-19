@@ -1,1 +1,15 @@
-# No exclusions - large files handled by Git LFS
+# Archives
+*.zip
+*.rar
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+*.log
