@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Logic to add to cart
             let name = "Custom Sneaker";
-            let price = 25000;
+            let price = 8999;
             let image = "assets/hero.png";
 
             const shopCard = btn.closest('.shop-card') || btn.closest('.gallery-card') || btn.closest('.gallery-item');
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 name = `${modelName} — ${selectedColor} (${materialLabel})`;
                 const pText = document.getElementById('total-price').textContent.replace(/[₹,\s]/g, '');
-                price = Math.round(parseFloat(pText)) || 20049;
+                price = Math.round(parseFloat(pText)) || 8999;
                 image = "assets/hero.png";
             }
 
