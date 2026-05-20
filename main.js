@@ -58,7 +58,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="cart-item">
                     <div class="cart-item-info">
                         <div class="cart-item-name">${swatchHtml}${item.name}</div>
-                        <div class="cart-item-price">₹${item.price.toLocaleString('en-IN')} x ${item.quantity}</div>
+                        <div class="cart-item-price" style="display:flex; align-items:center; gap:10px; margin-top:4px;">
+                            <span>₹${item.price.toLocaleString('en-IN')}</span>
+                            <div class="cart-qty-controls" style="display:inline-flex; align-items:center; gap:8px; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);">
+                                <button class="cart-qty-btn cart-qty-minus" data-index="${index}" style="background:transparent; border:none; color:#aaa; cursor:pointer; font-size:16px; padding:0 4px; transition:color 0.2s;">-</button>
+                                <span style="font-size:0.9rem; min-width:16px; text-align:center;">${item.quantity}</span>
+                                <button class="cart-qty-btn cart-qty-plus" data-index="${index}" style="background:transparent; border:none; color:#aaa; cursor:pointer; font-size:16px; padding:0 4px; transition:color 0.2s;">+</button>
+                            </div>
+                        </div>
                     </div>
                     <button class="cart-item-remove" data-index="${index}">🗑️</button>
                 </div>
@@ -76,6 +83,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveCart();
                 renderCart();
             });
+        });
+
+        // Add quantity listeners
+        document.querySelectorAll('.cart-qty-minus').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.getAttribute('data-index'));
+                if (cart[idx].quantity > 1) {
+                    cart[idx].quantity -= 1;
+                } else {
+                    cart.splice(idx, 1); // Remove item if quantity hits 0
+                }
+                saveCart();
+                renderCart();
+            });
+            // Hover effect
+            btn.addEventListener('mouseover', () => btn.style.color = '#fff');
+            btn.addEventListener('mouseout', () => btn.style.color = '#aaa');
+        });
+
+        document.querySelectorAll('.cart-qty-plus').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.getAttribute('data-index'));
+                cart[idx].quantity += 1;
+                saveCart();
+                renderCart();
+            });
+            // Hover effect
+            btn.addEventListener('mouseover', () => btn.style.color = '#fff');
+            btn.addEventListener('mouseout', () => btn.style.color = '#aaa');
         });
     }
 
