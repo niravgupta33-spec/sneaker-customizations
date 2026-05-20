@@ -59,15 +59,8 @@
                 <div class="option-group">
                     <h3>👟 Choose Model</h3>
                     <div class="model-selector">
-                        <button class="model-card active" id="modelBtn-nike" data-model="nike">
-                            <div class="model-card-icon">🔥</div>
-                            <div class="model-card-info">
-                                <span class="model-card-name">Nike Air</span>
-                                <span class="model-card-desc">Premium athletic shoe</span>
-                            </div>
-                            <div class="model-card-check">✓</div>
-                        </button>
-                        <button class="model-card" id="modelBtn-superstar" data-model="superstar">
+
+                        <button class="model-card active" id="modelBtn-superstar" data-model="superstar">
                             <div class="model-card-icon">⭐</div>
                             <div class="model-card-info">
                                 <span class="model-card-name">Superstar</span>
@@ -83,7 +76,7 @@
                     <div class="color-picker-wrapper">
                         <input type="color" id="shoeColorPicker" value="#ffffff">
                         <div class="picker-info">
-                            <span class="picker-label">Changes upper only — sole stays white</span>
+                            <span class="picker-label">Changes entire shoe color</span>
                             <span class="picker-hex" id="pickerHexDisplay">#FFFFFF</span>
                         </div>
                     </div>
@@ -137,13 +130,8 @@
         if (!container || !canvas) return;
 
         // --- Model definitions ---
+
         const MODELS = {
-            nike: {
-                file: 'uploads_files_4278121_Nike_Air_Shoes.glb?v=2',
-                type: 'glb',
-                name: 'Nike Air',
-                price: '₹20,049.00'
-            },
             superstar: {
                 file: 'superstar.glb',
                 type: 'glb',
@@ -152,7 +140,7 @@
             }
         };
 
-        let currentModelKey = 'nike';
+        let currentModelKey = 'superstar';
 
         // --- Scene setup ---
         const scene = new THREE.Scene();
@@ -201,10 +189,8 @@
 
         // --- State ---
         let shoeObject = null;
-        let shoeMaterials = [];       // For GLB upper-only materials
-        let upperVertexData = [];     // For OBJ per-vertex upper coloring
+        let shoeMaterials = [];       // For GLB materials
         let isLoading = false;
-        const SOLE_RATIO = 0.28;     // Bottom 28% of model height = sole
 
         // --- Loaders ---
         const gltfLoader = new THREE.GLTFLoader();
@@ -227,7 +213,6 @@
                 shoeObject = null;
             }
             shoeMaterials = [];
-            upperVertexData = [];
         }
 
         // --- Helper: prepare model (center & scale) ---
@@ -249,75 +234,7 @@
             controls.update();
         }
 
-        // --- Helper: setup vertex colors for upper/sole separation ---
-        function setupUpperColoring(obj) {
-            upperVertexData = [];
-            obj.updateMatrixWorld(true);
 
-            // Compute bounding box in world space (before prepareModel transform)
-            var bbox = new THREE.Box3().setFromObject(obj);
-            var minY = bbox.min.y;
-            var height = bbox.max.y - minY;
-            var soleThreshold = minY + height * SOLE_RATIO;
-
-            var vertex = new THREE.Vector3();
-
-            obj.traverse(function(child) {
-                if (!child.isMesh) return;
-                var geom = child.geometry;
-                var pos = geom.attributes.position;
-                var count = pos.count;
-
-                // Create white vertex color buffer
-                var colorArr = new Float32Array(count * 3);
-                for (var i = 0; i < count; i++) {
-                    colorArr[i * 3] = 1;
-                    colorArr[i * 3 + 1] = 1;
-                    colorArr[i * 3 + 2] = 1;
-                }
-                geom.setAttribute('color', new THREE.BufferAttribute(colorArr, 3));
-
-                // Enable vertex colors on material
-                child.material.vertexColors = true;
-                child.material.color.set(0xffffff);
-                child.material.needsUpdate = true;
-
-                // Find upper vertex indices (above sole threshold in world space)
-                var upperIndices = [];
-                var wm = child.matrixWorld;
-                for (var i = 0; i < count; i++) {
-                    vertex.set(pos.getX(i), pos.getY(i), pos.getZ(i));
-                    vertex.applyMatrix4(wm);
-                    if (vertex.y > soleThreshold) {
-                        upperIndices.push(i);
-                    }
-                }
-
-                if (upperIndices.length > 0) {
-                    upperVertexData.push({
-                        geometry: geom,
-                        upperIndices: upperIndices
-                    });
-                }
-            });
-        }
-
-        // --- Helper: apply color to upper vertices only ---
-        function applyUpperColor(hex) {
-            var color = new THREE.Color(hex);
-            upperVertexData.forEach(function(data) {
-                var colors = data.geometry.attributes.color;
-                // Reset all vertices to white (sole color)
-                for (var i = 0; i < colors.count; i++) {
-                    colors.setXYZ(i, 1, 1, 1);
-                }
-                // Set upper vertices to selected color
-                data.upperIndices.forEach(function(idx) {
-                    colors.setXYZ(idx, color.r, color.g, color.b);
-                });
-                colors.needsUpdate = true;
-            });
-        }
 
         // --- Show / hide loading ---
         function showLoading(text) {
@@ -374,68 +291,34 @@
             gltfLoader.load(modelDef.file, function(gltf) {
                     var model = gltf.scene;
 
-                    model.updateMatrixWorld(true);
-                    var modelBox = new THREE.Box3().setFromObject(model);
-                    var modelMinY = modelBox.min.y;
-                    var modelHeight = modelBox.max.y - modelMinY;
-                    var soleCutoff = modelMinY + modelHeight * SOLE_RATIO;
-
-                    // Check if this is a simple model (single mesh, no textures)
-                    var meshCount = 0;
-                    var hasTextures = false;
                     model.traverse(function(child) {
                         if (child.isMesh) {
-                            meshCount++;
-                            var mat = child.material;
-                            if (mat.map || mat.normalMap || mat.roughnessMap || mat.metalnessMap) hasTextures = true;
-                        }
-                    });
-                    var useVertexColoring = (meshCount <= 1 && !hasTextures);
-
-                    if (useVertexColoring) {
-                        // Superstar-style: single mesh, use vertex coloring for upper/sole
-                        model.traverse(function(child) {
-                            if (child.isMesh) {
-                                child.geometry.computeVertexNormals();
+                            child.geometry.computeVertexNormals();
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(function(mat) {
+                                    mat.side = THREE.DoubleSide;
+                                    mat.color.set(0xffffff);
+                                    shoeMaterials.push(mat);
+                                });
+                            } else {
                                 child.material = new THREE.MeshStandardMaterial({
                                     color: 0xffffff,
                                     roughness: 0.45,
                                     metalness: 0.1,
-                                    side: THREE.DoubleSide,
-                                    vertexColors: true
+                                    side: THREE.DoubleSide
                                 });
+                                shoeMaterials.push(child.material);
                             }
-                        });
-                        setupUpperColoring(model);
-                    } else {
-                        // Nike Air-style: multi-mesh with textures, classify by bounding box
-                        model.traverse(function(child) {
-                            if (child.isMesh) {
-                                child.geometry.computeVertexNormals();
-                                var meshBox = new THREE.Box3().setFromObject(child);
-                                var meshCenterY = (meshBox.min.y + meshBox.max.y) / 2;
-                                var isUpper = meshCenterY > soleCutoff;
-
-                                if (Array.isArray(child.material)) {
-                                    child.material.forEach(function(mat) {
-                                        mat.side = THREE.DoubleSide;
-                                        if (isUpper) shoeMaterials.push(mat);
-                                    });
-                                } else {
-                                    child.material.side = THREE.DoubleSide;
-                                    if (isUpper) shoeMaterials.push(child.material);
-                                }
-                            }
-                        });
-                    }
+                        }
+                    });
                     prepareModel(model);
                     hideLoading();
                     isLoading = false;
                 }, onProgress, onError);
         }
 
-        // --- Load default model (Nike Air) ---
-        loadModel('nike');
+        // --- Load default model (Superstar) ---
+        loadModel('superstar');
 
         // --- Model selector buttons ---
         var modelBtns = document.querySelectorAll('.model-card');
@@ -457,16 +340,11 @@
                 var hex = e.target.value;
                 if (pickerHexDisplay) pickerHexDisplay.textContent = hex.toUpperCase();
 
-                // GLB: change upper materials only
+                // Change all materials
                 shoeMaterials.forEach(function(mat) {
                     mat.color.set(hex);
                     mat.needsUpdate = true;
                 });
-
-                // OBJ: change upper vertex colors only
-                if (upperVertexData.length > 0) {
-                    applyUpperColor(hex);
-                }
             });
         }
 

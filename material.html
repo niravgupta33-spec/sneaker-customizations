@@ -43,11 +43,8 @@
 
                 <!-- Model Switcher Floating Pills -->
                 <div class="model-switcher-pills" id="modelSwitcherPills">
-                    <button class="model-pill active" data-model="nike" id="pillNike">
-                        <span class="pill-icon">🔥</span>
-                        <span class="pill-label">Nike Air</span>
-                    </button>
-                    <button class="model-pill" data-model="superstar" id="pillSuperstar">
+
+                    <button class="model-pill active" data-model="superstar" id="pillSuperstar">
                         <span class="pill-icon">⭐</span>
                         <span class="pill-label">Superstar</span>
                     </button>
@@ -153,11 +150,6 @@
 
         // --- Model definitions ---
         var MODELS = {
-            nike: {
-                file: 'uploads_files_4278121_Nike_Air_Shoes.glb?v=2',
-                type: 'glb',
-                name: 'Nike Air'
-            },
             superstar: {
                 file: 'superstar.glb',
                 type: 'glb',
@@ -204,7 +196,7 @@
             }
         };
 
-        var currentModelKey = 'nike';
+        var currentModelKey = 'superstar';
         var currentMaterialKey = 'leather';
 
         // --- Scene setup ---
@@ -381,7 +373,7 @@
         }
 
         // --- Load default model ---
-        loadModel('nike');
+        loadModel('superstar');
 
         // --- Model switcher pills ---
         var modelPills = document.querySelectorAll('.model-pill');
