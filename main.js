@@ -169,7 +169,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         </div>
                     </div>
-                    <button class="cart-item-remove" data-index="${index}">🗑️</button>
+                    <button class="cart-item-remove" data-index="${index}" aria-label="Remove Item" style="display: flex; align-items: center; justify-content: center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                    </button>
                 </div>
             `;
         });
@@ -955,7 +957,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (orders.length === 0) {
             container.innerHTML = `
                 <div class="orders-empty">
-                    <div class="empty-icon">📦</div>
+                    <div class="empty-icon" style="margin-bottom: 20px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block;"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><polygon points="12 22.08 12 12 3 6.92 3 17 12 22.08"></polygon><polygon points="12 22.08 12 12 21 6.92 21 17 12 22.08"></polygon><polygon points="12 12 3 6.92 12 1.84 21 6.92 12 12"></polygon></svg>
+                    </div>
                     <h3>No Orders Yet</h3>
                     <p>Once you checkout, your order history will appear here.</p>
                     <a href="index.html" class="btn-primary glow" style="margin-top:20px; display:inline-block;">Start Shopping</a>
