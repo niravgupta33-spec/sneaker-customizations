@@ -1054,4 +1054,56 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ===== CUSTOM LERP CURSOR =====
+    const cursorDot = document.getElementById('cursorDot');
+    const cursorRing = document.getElementById('cursorRing');
+    
+    if (cursorDot && cursorRing) {
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let ringX = mouseX;
+        let ringY = mouseY;
+        let dotX = mouseX;
+        let dotY = mouseY;
+
+        // Mouse move listener
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // LERP Animation loop
+        const lerp = (start, end, amt) => (1 - amt) * start + amt * end;
+
+        const animateCursor = () => {
+            // Ring follows with a slight delay
+            ringX = lerp(ringX, mouseX, 0.15);
+            ringY = lerp(ringY, mouseY, 0.15);
+            cursorRing.style.left = `${ringX}px`;
+            cursorRing.style.top = `${ringY}px`;
+
+            // Dot follows faster
+            dotX = lerp(dotX, mouseX, 0.35);
+            dotY = lerp(dotY, mouseY, 0.35);
+            cursorDot.style.left = `${dotX}px`;
+            cursorDot.style.top = `${dotY}px`;
+
+            requestAnimationFrame(animateCursor);
+        };
+        
+        animateCursor();
+
+        // Add hover effects for buttons, links, cards
+        const hoverElements = document.querySelectorAll('a, button, .shop-card, .gallery-card, .feature-card, input, select');
+        hoverElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursorRing.classList.add('hover-active');
+                cursorDot.classList.add('hover-active');
+            });
+            el.addEventListener('mouseleave', () => {
+                cursorRing.classList.remove('hover-active');
+                cursorDot.classList.remove('hover-active');
+            });
+        });
+    }
 });
