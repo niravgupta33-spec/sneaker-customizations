@@ -566,20 +566,67 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
 
                     <div class="form-divider"></div>
-                    <h3 class="form-section-title">💳 Payment Details</h3>
-
-                    <div class="form-group">
-                        <label for="payCardNumber">Card Number</label>
-                        <input type="text" id="payCardNumber" placeholder="4242 4242 4242 4242" maxlength="19" required autocomplete="cc-number">
+                    <h3 class="form-section-title">💸 Choose Payment Method</h3>
+                    
+                    <div class="payment-methods-selector">
+                        <button type="button" class="method-tab active" data-method="card">
+                            <span class="icon">💳</span> Card
+                        </button>
+                        <button type="button" class="method-tab" data-method="upi">
+                            <span class="icon">📱</span> UPI
+                        </button>
+                        <button type="button" class="method-tab" data-method="cod">
+                            <span class="icon">💵</span> COD
+                        </button>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="payExpiry">Expiry</label>
-                            <input type="text" id="payExpiry" placeholder="MM/YY" maxlength="5" required autocomplete="cc-exp">
+
+                    <!-- Card Details -->
+                    <div id="containerCard" class="method-content">
+                        <div class="form-group" style="margin-bottom:12px;">
+                            <label for="payCardNumber">Card Number</label>
+                            <input type="text" id="payCardNumber" placeholder="4242 4242 4242 4242" maxlength="19" required autocomplete="cc-number">
                         </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="payExpiry">Expiry</label>
+                                <input type="text" id="payExpiry" placeholder="MM/YY" maxlength="5" required autocomplete="cc-exp">
+                            </div>
+                            <div class="form-group">
+                                <label for="payCVV">CVV</label>
+                                <input type="text" id="payCVV" placeholder="123" maxlength="4" required autocomplete="cc-csc">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- UPI Details -->
+                    <div id="containerUPI" class="method-content hidden">
                         <div class="form-group">
-                            <label for="payCVV">CVV</label>
-                            <input type="text" id="payCVV" placeholder="123" maxlength="4" required autocomplete="cc-csc">
+                            <label for="payUPIId">UPI ID</label>
+                            <div class="upi-verify-wrapper">
+                                <input type="text" id="payUPIId" placeholder="username@bank" autocomplete="off">
+                                <button type="button" class="btn-verify-upi" id="btnVerifyUPI">Verify</button>
+                            </div>
+                            <span id="upiStatusMessage" style="font-size:0.75rem; margin-top:2px; display:none;"></span>
+                        </div>
+                        <div class="upi-qr-section">
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Or Scan QR Code to Pay</p>
+                            <div class="qr-code-placeholder">
+                                <div class="qr-scan-line"></div>
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=kickcraft@upi%26pn=KickCraft%26cu=INR" alt="QR Code" id="upiQRCode">
+                            </div>
+                            <small style="color: var(--primary); font-size: 0.72rem; font-weight: 600;">Scan using GPay, PhonePe, Paytm</small>
+                        </div>
+                    </div>
+
+                    <!-- Cash on Delivery -->
+                    <div id="containerCOD" class="method-content hidden">
+                        <div class="cod-info-box">
+                            <span class="cod-icon">💵</span>
+                            <div>
+                                <p><strong>Cash on Delivery (COD) Selected</strong></p>
+                                <p style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">No upfront payment required. You will pay the courier in cash upon receiving your order.</p>
+                                <small>🔒 Verified COD Order — No hidden charges</small>
+                            </div>
                         </div>
                     </div>
 
@@ -592,8 +639,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <!-- Success state -->
                 <div class="payment-success" id="paymentSuccess" style="display:none;">
                     <div class="success-icon">✅</div>
-                    <h2>Payment Successful!</h2>
-                    <p>Your order has been placed. Thank you for shopping with KickCraft!</p>
+                    <h2>Order Placed Successfully!</h2>
+                    <p>Thank you for shopping with KickCraft! Your order is being processed.</p>
                     <p class="order-id-display" id="orderIdDisplay"></p>
                     <a href="orders.html" class="btn-primary glow" style="margin-top:20px; display:inline-block;">View Order History</a>
                 </div>
@@ -606,6 +653,94 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) closePaymentModal();
         });
+
+        // Payment method tabs switching logic
+        const tabs = modal.querySelectorAll('.method-tab');
+        const containers = {
+            card: modal.querySelector('#containerCard'),
+            upi: modal.querySelector('#containerUPI'),
+            cod: modal.querySelector('#containerCOD')
+        };
+        
+        const cardInputs = {
+            number: modal.querySelector('#payCardNumber'),
+            expiry: modal.querySelector('#payExpiry'),
+            cvv: modal.querySelector('#payCVV')
+        };
+        const upiInput = modal.querySelector('#payUPIId');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                const selectedMethod = tab.getAttribute('data-method');
+                
+                // Show/hide relevant container
+                Object.keys(containers).forEach(key => {
+                    if (key === selectedMethod) {
+                        containers[key].classList.remove('hidden');
+                    } else {
+                        containers[key].classList.add('hidden');
+                    }
+                });
+
+                // Toggle required tags
+                if (selectedMethod === 'card') {
+                    cardInputs.number.required = true;
+                    cardInputs.expiry.required = true;
+                    cardInputs.cvv.required = true;
+                    upiInput.required = false;
+                } else if (selectedMethod === 'upi') {
+                    cardInputs.number.required = false;
+                    cardInputs.expiry.required = false;
+                    cardInputs.cvv.required = false;
+                    upiInput.required = true;
+                } else {
+                    // COD
+                    cardInputs.number.required = false;
+                    cardInputs.expiry.required = false;
+                    cardInputs.cvv.required = false;
+                    upiInput.required = false;
+                }
+
+                // Update payment button text based on method
+                const payBtnText = document.getElementById('payBtnText');
+                const { total } = calculateCartTotals();
+                if (selectedMethod === 'cod') {
+                    payBtnText.textContent = `Confirm COD Order — ₹${total.toLocaleString('en-IN')}`;
+                } else {
+                    payBtnText.textContent = `Pay ₹${total.toLocaleString('en-IN')}`;
+                }
+            });
+        });
+
+        // UPI ID verification mock
+        const btnVerify = modal.querySelector('#btnVerifyUPI');
+        const upiStatus = modal.querySelector('#upiStatusMessage');
+        if (btnVerify && upiInput && upiStatus) {
+            btnVerify.addEventListener('click', () => {
+                const upiVal = upiInput.value.trim();
+                if (!upiVal || !upiVal.includes('@')) {
+                    upiStatus.textContent = '❌ Please enter a valid UPI ID (e.g. name@upi)';
+                    upiStatus.style.color = '#ff4a4a';
+                    upiStatus.style.display = 'block';
+                    return;
+                }
+                
+                btnVerify.textContent = 'Verifying...';
+                btnVerify.disabled = true;
+                upiStatus.style.display = 'none';
+
+                setTimeout(() => {
+                    btnVerify.textContent = 'Verify';
+                    btnVerify.disabled = false;
+                    upiStatus.textContent = '✅ UPI ID Verified: ' + upiVal;
+                    upiStatus.style.color = '#00ffcc';
+                    upiStatus.style.display = 'block';
+                }, 1000);
+            });
+        }
 
         // Card number formatting
         const cardInput = document.getElementById('payCardNumber');
@@ -645,9 +780,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const { totalItems, total } = calculateCartTotals();
         summaryText.textContent = `${totalItems} item${totalItems !== 1 ? 's' : ''} — ₹${total.toLocaleString('en-IN')}`;
 
-        // Update pay button text
-        const payBtnText = document.getElementById('payBtnText');
-        payBtnText.textContent = `Pay ₹${total.toLocaleString('en-IN')}`;
+        // Reset to Card tab first
+        const cardTab = modal.querySelector('.method-tab[data-method="card"]');
+        if (cardTab) {
+            cardTab.click();
+        } else {
+            // Backup update pay button text
+            const payBtnText = document.getElementById('payBtnText');
+            payBtnText.textContent = `Pay ₹${total.toLocaleString('en-IN')}`;
+        }
+
+        // Dynamic QR code generation based on exact price
+        const qrEl = modal.querySelector('#upiQRCode');
+        if (qrEl) {
+            qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=kickcraft@upi%26pn=KickCraft%26am=${total}%26cu=INR`;
+        }
 
         // Show modal
         modal.classList.add('active');
@@ -669,9 +816,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('paymentForm');
         const success = document.getElementById('paymentSuccess');
 
+        const activeTab = document.querySelector('.method-tab.active');
+        const selectedMethod = activeTab ? activeTab.getAttribute('data-method') : 'card';
+        const isCOD = selectedMethod === 'cod';
+
         // Show loading
         payBtn.disabled = true;
-        payBtnText.textContent = 'Processing...';
+        payBtnText.textContent = isCOD ? 'Placing Order...' : 'Processing...';
         payBtnSpinner.style.display = 'inline-block';
 
         // Simulate payment processing delay
@@ -679,6 +830,18 @@ document.addEventListener('DOMContentLoaded', () => {
             // Generate order
             const orderId = 'KC-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 5).toUpperCase();
             const { total, subtotal, shipping, discount } = calculateCartTotals();
+
+            // Determine payment method label
+            let paymentMethodText = 'Card';
+            if (selectedMethod === 'card') {
+                const cardNum = document.getElementById('payCardNumber').value;
+                paymentMethodText = 'Card ending ' + cardNum.replace(/\s/g, '').slice(-4);
+            } else if (selectedMethod === 'upi') {
+                const upiVal = document.getElementById('payUPIId').value;
+                paymentMethodText = 'UPI (' + upiVal + ')';
+            } else if (selectedMethod === 'cod') {
+                paymentMethodText = 'Cash on Delivery';
+            }
 
             const order = {
                 id: orderId,
@@ -695,7 +858,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     address: document.getElementById('payAddress').value
                 },
                 status: 'Confirmed',
-                paymentMethod: 'Card ending ' + document.getElementById('payCardNumber').value.slice(-4)
+                paymentMethod: paymentMethodText
             };
 
             // Save to order history

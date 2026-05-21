@@ -1426,6 +1426,171 @@ footer {
     margin-top: 4px;
 }
 
+/* ===== PAYMENT METHOD SELECTION ===== */
+.payment-methods-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 6px;
+}
+
+.method-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 10px 6px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.method-tab:hover {
+    color: var(--text-color);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.method-tab.active {
+    color: #000;
+    background: linear-gradient(90deg, var(--primary), #00d2aa);
+    box-shadow: 0 0 15px var(--primary-glow);
+}
+
+.method-tab .icon {
+    font-size: 1.2rem;
+}
+
+/* Method containers transition */
+.method-content {
+    display: block;
+    animation: fadeInPayment 0.3s ease;
+}
+
+.method-content.hidden {
+    display: none;
+}
+
+/* UPI Styles */
+.upi-verify-wrapper {
+    display: flex;
+    gap: 10px;
+}
+
+.upi-verify-wrapper input {
+    flex: 1;
+}
+
+.btn-verify-upi {
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    color: var(--text-color);
+    transition: var(--transition);
+}
+
+.btn-verify-upi:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.upi-qr-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    text-align: center;
+}
+
+.qr-code-placeholder {
+    width: 130px;
+    height: 130px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.qr-code-placeholder img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Scan line animation inside QR code */
+.qr-scan-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--primary);
+    box-shadow: 0 0 8px var(--primary-glow);
+    animation: scanAnimation 2s infinite linear;
+}
+
+@keyframes scanAnimation {
+    0% { top: 0%; }
+    50% { top: 100%; }
+    100% { top: 0%; }
+}
+
+@keyframes fadeInPayment {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* COD Styles */
+.cod-info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: rgba(0, 255, 204, 0.05);
+    border: 1px dashed var(--primary);
+    border-radius: 16px;
+    margin-top: 8px;
+}
+
+.cod-info-box .cod-icon {
+    font-size: 1.8rem;
+}
+
+.cod-info-box p {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    line-height: 1.4;
+    margin: 0;
+}
+
+.cod-info-box small {
+    display: block;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-size: 0.78rem;
+}
+
 /* ===== ORDER HISTORY PAGE ===== */
 .orders-page-container {
     max-width: 800px;
