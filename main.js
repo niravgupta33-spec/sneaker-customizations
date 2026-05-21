@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- CART STATE ---
     let cart = [];
+    let appliedCoupon = localStorage.getItem('kickcraft_coupon') || '';
     const cartBadge = document.getElementById('cartBadge');
     const cartItemsContainer = document.getElementById('cartItemsContainer');
     const cartTotal = document.getElementById('cartTotal');
@@ -25,11 +26,106 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('kickcraft_cart', JSON.stringify(cart));
     }
 
+    function calculateCartTotals() {
+        const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        
+        let shipping = cart.length > 0 ? 99 : 0;
+        let discount = 0;
+        let couponStatusMessage = '';
+        
+        if (appliedCoupon === 'FREESHIP') {
+            if (subtotal >= 9999) {
+                shipping = 0;
+                couponStatusMessage = 'Coupon FREESHIP applied: Free shipping!';
+            } else {
+                appliedCoupon = '';
+                localStorage.removeItem('kickcraft_coupon');
+                couponStatusMessage = 'Coupon FREESHIP removed (subtotal fell below ₹9,999)';
+            }
+        } else if (appliedCoupon === 'BUY3GET25') {
+            if (totalItems >= 3) {
+                discount = Math.round(subtotal * 0.25);
+                couponStatusMessage = 'Coupon BUY3GET25 applied: 25% off subtotal!';
+            } else {
+                appliedCoupon = '';
+                localStorage.removeItem('kickcraft_coupon');
+                couponStatusMessage = 'Coupon BUY3GET25 removed (quantity fell below 3 items)';
+            }
+        } else if (appliedCoupon) {
+            appliedCoupon = '';
+            localStorage.removeItem('kickcraft_coupon');
+        }
+        
+        const total = Math.max(0, subtotal + shipping - discount);
+        
+        return {
+            subtotal,
+            totalItems,
+            shipping,
+            discount,
+            total,
+            couponStatusMessage
+        };
+    }
+
+    function applyCoupon() {
+        const input = document.getElementById('couponInput');
+        if (!input) return;
+        const code = input.value.trim().toUpperCase();
+        if (!code) return;
+        
+        const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        
+        let message = '';
+        let isError = false;
+        
+        if (code === 'FREESHIP') {
+            if (subtotal >= 9999) {
+                appliedCoupon = 'FREESHIP';
+                localStorage.setItem('kickcraft_coupon', 'FREESHIP');
+                message = 'Coupon FREESHIP applied: Free shipping!';
+            } else {
+                message = 'Coupon FREESHIP requires subtotal of ₹9,999+';
+                isError = true;
+            }
+        } else if (code === 'BUY3GET25') {
+            if (totalItems >= 3) {
+                appliedCoupon = 'BUY3GET25';
+                localStorage.setItem('kickcraft_coupon', 'BUY3GET25');
+                message = 'Coupon BUY3GET25 applied: 25% off subtotal!';
+            } else {
+                message = 'Coupon BUY3GET25 requires buying 3+ items';
+                isError = true;
+            }
+        } else {
+            message = 'Invalid coupon code';
+            isError = true;
+        }
+        
+        renderCart();
+        
+        const msgEl = document.getElementById('couponMessage');
+        if (msgEl) {
+            msgEl.textContent = message;
+            msgEl.style.display = 'block';
+            msgEl.style.color = isError ? '#ff4a4a' : '#00ffcc';
+        }
+    }
+    
+    function removeCoupon() {
+        appliedCoupon = '';
+        localStorage.removeItem('kickcraft_coupon');
+        renderCart();
+    }
+
     function renderCart() {
         if (!cartBadge || !cartItemsContainer || !cartTotal) return;
 
+        const { subtotal, totalItems, shipping, discount, total, couponStatusMessage } = calculateCartTotals();
+
         // Update badge
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
         cartBadge.textContent = totalItems;
         if (totalItems === 0) {
             cartBadge.style.display = 'none';
@@ -40,15 +136,21 @@ document.addEventListener('DOMContentLoaded', () => {
         // Render items
         if (cart.length === 0) {
             cartItemsContainer.innerHTML = '<div class="cart-empty">Your cart is empty.</div>';
-            cartTotal.textContent = '₹0';
+            const footerEl = document.querySelector('.cart-footer');
+            if (footerEl) {
+                footerEl.innerHTML = `
+                    <div class="cart-total">
+                        <span>Total:</span>
+                        <span id="cartTotal">₹0</span>
+                    </div>
+                    <button class="btn-primary btn-checkout" style="width: 100%;" disabled>Checkout</button>
+                `;
+            }
             return;
         }
 
         let html = '';
-        let total = 0;
-
         cart.forEach((item, index) => {
-            total += item.price * item.quantity;
             // Extract color hex from name if present (e.g. "Model X — #FF0000 (Matte)")
             const colorMatch = item.name.match(/#[0-9A-Fa-f]{6}/);
             const swatchHtml = colorMatch 
@@ -73,7 +175,67 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         cartItemsContainer.innerHTML = html;
-        cartTotal.textContent = `₹${total.toLocaleString('en-IN')}`;
+
+        // Render Cart Footer
+        const footerEl = document.querySelector('.cart-footer');
+        if (footerEl) {
+            let discountRow = '';
+            if (discount > 0) {
+                discountRow = `
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; color: var(--primary);">
+                        <span>Discount (25% off):</span>
+                        <span>-₹${discount.toLocaleString('en-IN')}</span>
+                    </div>
+                `;
+            }
+            
+            let couponStatusHtml = '';
+            if (appliedCoupon) {
+                couponStatusHtml = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0, 255, 204, 0.05); padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; border: 1px solid rgba(0, 255, 204, 0.2);">
+                        <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">🎟️ ${appliedCoupon} Applied</span>
+                        <button id="couponRemoveBtn" style="background: none; border: none; color: #ff007f; cursor: pointer; font-size: 0.8rem; font-weight: bold;">Remove</button>
+                    </div>
+                `;
+            }
+
+            footerEl.innerHTML = `
+                <!-- Detailed breakdown -->
+                <div style="padding-bottom: 12px; border-bottom: 1px solid var(--card-border); margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px;">
+                        <span style="color: var(--text-muted);">Subtotal:</span>
+                        <span>₹${subtotal.toLocaleString('en-IN')}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px;">
+                        <span style="color: var(--text-muted);">Shipping:</span>
+                        <span>${shipping === 0 ? '<span style="color: var(--primary); font-weight: 600;">FREE</span>' : `₹${shipping}`}</span>
+                    </div>
+                    ${discountRow}
+                </div>
+
+                <!-- Coupon Input & Badges -->
+                <div class="coupon-section" style="margin-bottom: 16px;">
+                    ${couponStatusHtml}
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <input type="text" id="couponInput" placeholder="Promo code" style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); border-radius: 6px; padding: 6px 12px; color: #fff; font-family: inherit; font-size: 0.85rem;">
+                        <button id="couponApplyBtn" class="btn-primary" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">Apply</button>
+                    </div>
+                    <div id="couponMessage" style="font-size: 0.75rem; margin-bottom: 8px; display: none;"></div>
+                    <div class="available-coupons" style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Available:</span>
+                        <button class="coupon-badge" data-code="BUY3GET25" style="background: rgba(0, 255, 204, 0.1); border: 1px dashed var(--primary); color: var(--primary); padding: 1px 6px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; font-family: inherit;">BUY3GET25 (3+ items)</button>
+                        <button class="coupon-badge" data-code="FREESHIP" style="background: rgba(255, 0, 127, 0.1); border: 1px dashed var(--secondary); color: var(--secondary); padding: 1px 6px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; font-family: inherit;">FREESHIP (₹9,999+)</button>
+                    </div>
+                </div>
+
+                <!-- Total -->
+                <div class="cart-total" style="margin-bottom: 16px;">
+                    <span>Total:</span>
+                    <span id="cartTotal">₹${total.toLocaleString('en-IN')}</span>
+                </div>
+                <button class="btn-primary btn-checkout" style="width: 100%;">Checkout</button>
+            `;
+        }
 
         // Add remove listeners
         document.querySelectorAll('.cart-item-remove').forEach(btn => {
@@ -480,13 +642,12 @@ document.addEventListener('DOMContentLoaded', () => {
         success.style.display = 'none';
 
         // Update summary
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        summaryText.textContent = `${totalItems} item${totalItems !== 1 ? 's' : ''} — ₹${totalPrice.toLocaleString('en-IN')}`;
+        const { totalItems, total } = calculateCartTotals();
+        summaryText.textContent = `${totalItems} item${totalItems !== 1 ? 's' : ''} — ₹${total.toLocaleString('en-IN')}`;
 
         // Update pay button text
         const payBtnText = document.getElementById('payBtnText');
-        payBtnText.textContent = `Pay ₹${totalPrice.toLocaleString('en-IN')}`;
+        payBtnText.textContent = `Pay ₹${total.toLocaleString('en-IN')}`;
 
         // Show modal
         modal.classList.add('active');
@@ -517,13 +678,17 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             // Generate order
             const orderId = 'KC-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 5).toUpperCase();
-            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const { total, subtotal, shipping, discount } = calculateCartTotals();
 
             const order = {
                 id: orderId,
                 date: new Date().toISOString(),
                 items: JSON.parse(JSON.stringify(cart)),
-                total: totalPrice,
+                subtotal: subtotal,
+                shipping: shipping,
+                discount: discount,
+                total: total,
+                coupon: appliedCoupon,
                 customer: {
                     name: document.getElementById('payFullName').value,
                     email: document.getElementById('payEmail').value,
@@ -545,6 +710,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Clear cart
             cart = [];
+            appliedCoupon = '';
+            localStorage.removeItem('kickcraft_coupon');
             saveCart();
             renderCart();
 
@@ -564,17 +731,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 2000);
     }
 
-    // Attach checkout button handler to all pages
-    const checkoutBtns = document.querySelectorAll('.btn-checkout');
-    checkoutBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
+    // Use event delegation for dynamic cart and coupon controls
+    document.addEventListener('click', (e) => {
+        // Checkout button
+        if (e.target && e.target.classList.contains('btn-checkout')) {
             if (cart.length === 0) {
                 alert('Your cart is empty! Add some items first.');
                 return;
             }
             closeCart();
             openPaymentModal();
-        });
+        }
+        
+        // Coupon Apply button
+        if (e.target && e.target.id === 'couponApplyBtn') {
+            applyCoupon();
+        }
+        
+        // Coupon badge clicks
+        if (e.target && e.target.classList.contains('coupon-badge')) {
+            const code = e.target.getAttribute('data-code');
+            const input = document.getElementById('couponInput');
+            if (input) {
+                input.value = code;
+                applyCoupon();
+            }
+        }
+
+        // Coupon Remove button
+        if (e.target && e.target.id === 'couponRemoveBtn') {
+            removeCoupon();
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.target && e.target.id === 'couponInput' && e.key === 'Enter') {
+            e.preventDefault();
+            applyCoupon();
+        }
     });
 
 
@@ -630,6 +824,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             });
 
+            let breakdownHtml = '';
+            if (order.subtotal !== undefined) {
+                const shippingText = order.shipping === 0 ? 'FREE' : `₹${order.shipping.toLocaleString('en-IN')}`;
+                const discountText = order.discount > 0 ? `-₹${order.discount.toLocaleString('en-IN')}` : '₹0';
+                const couponBadge = order.coupon ? `<span style="background:rgba(0,255,204,0.1);color:var(--primary);padding:2px 6px;border-radius:4px;font-size:0.7rem;margin-left:8px;border:1px solid rgba(0,255,204,0.2);">🎟️ ${order.coupon}</span>` : '';
+                breakdownHtml = `
+                    <div class="order-breakdown" style="padding: 10px 0; border-top: 1px dashed rgba(255,255,255,0.1); margin-top: 10px; font-size: 0.85rem; color: var(--text-muted);">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                            <span>Subtotal:</span>
+                            <span>₹${order.subtotal.toLocaleString('en-IN')}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                            <span>Shipping:</span>
+                            <span>${shippingText}</span>
+                        </div>
+                        ${order.discount > 0 ? `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:4px; color:var(--primary);">
+                            <span>Discount ${couponBadge}:</span>
+                            <span>${discountText}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
             html += `
                 <div class="order-card">
                     <div class="order-card-header">
@@ -641,6 +860,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="order-items-list">
                         ${itemsHtml}
+                        ${breakdownHtml}
                     </div>
                     <div class="order-card-footer">
                         <div class="order-customer">
